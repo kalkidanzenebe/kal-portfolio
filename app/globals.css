@@ -1,11 +1,9 @@
 @import "tailwindcss";
 
-/* Prefer data-theme — survives better than class alone after hydration */
+/* Match data-theme on html OR the React theme wrapper */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-:root,
-html[data-theme="light"],
-html.light {
+:root {
   --background: #f7f7f8;
   --foreground: #111111;
   --muted: #6b7280;
@@ -13,18 +11,45 @@ html.light {
   --accent: #ff6600;
   --accent-hover: #e55a00;
   --border: #e5e7eb;
+}
+
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme="light"] {
+  --background: #f7f7f8 !important;
+  --foreground: #111111 !important;
+  --muted: #6b7280 !important;
+  --card: #ffffff !important;
+  --accent: #ff6600 !important;
+  --accent-hover: #e55a00 !important;
+  --border: #e5e7eb !important;
+  --color-background: #f7f7f8 !important;
+  --color-foreground: #111111 !important;
+  --color-muted: #6b7280 !important;
+  --color-card: #ffffff !important;
+  --color-accent: #ff6600 !important;
+  --color-accent-hover: #e55a00 !important;
+  --color-border: #e5e7eb !important;
   color-scheme: light;
 }
 
 html[data-theme="dark"],
-html.dark {
-  --background: #0a0a0a;
-  --foreground: #f5f5f5;
-  --muted: #a3a3a3;
-  --card: #141414;
-  --accent: #ff6600;
-  --accent-hover: #e55a00;
-  --border: #262626;
+body[data-theme="dark"],
+[data-theme="dark"] {
+  --background: #0a0a0a !important;
+  --foreground: #f5f5f5 !important;
+  --muted: #a3a3a3 !important;
+  --card: #141414 !important;
+  --accent: #ff6600 !important;
+  --accent-hover: #e55a00 !important;
+  --border: #262626 !important;
+  --color-background: #0a0a0a !important;
+  --color-foreground: #f5f5f5 !important;
+  --color-muted: #a3a3a3 !important;
+  --color-card: #141414 !important;
+  --color-accent: #ff6600 !important;
+  --color-accent-hover: #e55a00 !important;
+  --color-border: #262626 !important;
   color-scheme: dark;
 }
 
@@ -44,14 +69,15 @@ html {
   height: 100%;
   scroll-behavior: smooth;
   scroll-padding-top: 6rem;
+}
+
+html,
+body {
   background-color: var(--background);
   color: var(--foreground);
 }
 
 body {
   min-height: 100%;
-  background-color: var(--background);
-  color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }

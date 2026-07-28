@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { applyTheme, type Theme } from "@/lib/theme";
+import { applyTheme, getThemeStyle, type Theme } from "@/lib/theme";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -33,13 +33,13 @@ function readStoredTheme(): Theme {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
+  const [ready, setReady] = useState(false);
 
-  // useLayoutEffect runs before paint so React hydration can't leave a
-  // wiped html class looking like the wrong theme on mobile.
   useLayoutEffect(() => {
     const next = readStoredTheme();
     setThemeState(next);
     applyTheme(next);
+    setReady(true);
   }, []);
 
   const setTheme = useCallback((next: Theme) => {
@@ -70,7 +70,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     [theme, setTheme, toggleTheme]
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  // React-owned style wrapper: mobile browsers reliably repaint this on toggle,
+  // even when html/body CSS variables get stuck.
+  return (
+    <ThemeContext.Provider value={value}>
+      <div
+        data-theme={theme}
+        data-theme-ready={ready ? "true" : "false"}
+        className="min-h-full"
+        style={getThemeStyle(theme)}
+      >
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {

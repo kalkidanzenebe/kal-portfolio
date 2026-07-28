@@ -54,10 +54,18 @@ const themeInitScript = `
       root.style.setProperty(key, vars[key]);
       root.style.setProperty('--color-' + key.slice(2), vars[key]);
     }
+    root.style.backgroundColor = vars['--background'];
+    root.style.color = vars['--foreground'];
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
     root.style.colorScheme = theme;
     root.setAttribute('data-theme', theme);
+    if (document.body) {
+      document.body.setAttribute('data-theme', theme);
+      document.body.style.backgroundColor = vars['--background'];
+      document.body.style.color = vars['--foreground'];
+      document.body.style.colorScheme = theme;
+    }
   } catch (e) {
     var root = document.documentElement;
     for (var key in dark) {
@@ -81,11 +89,12 @@ export default function RootLayout({
     // className and strips light/dark, which breaks theme after deploy.
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="color-scheme" content="dark" />
         <meta name="theme-color" content="#0a0a0a" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col bg-background text-foreground antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col antialiased`}
       >
         <Providers>{children}</Providers>
       </body>

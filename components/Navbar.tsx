@@ -142,7 +142,7 @@ export default function Navbar() {
               toggleTheme();
             }}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            className="inline-flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-border bg-card/80 text-foreground transition active:scale-95 hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="inline-flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-border bg-card text-foreground transition active:scale-95 hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <motion.span
               key={theme}
@@ -217,7 +217,7 @@ export default function Navbar() {
                 e.stopPropagation();
                 toggleTheme();
               }}
-              className="mt-2 flex w-full touch-manipulation items-center justify-between rounded-2xl border border-border bg-card/80 px-4 py-3 text-sm font-medium text-foreground transition active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="mt-2 flex w-full touch-manipulation items-center justify-between rounded-2xl border border-border bg-card px-4 py-3 text-sm font-medium text-foreground transition active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
             >
               <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
