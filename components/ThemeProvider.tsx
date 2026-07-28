@@ -4,12 +4,11 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
-
-type Theme = "light" | "dark";
+import { applyTheme, type Theme } from "@/lib/theme";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -18,14 +17,6 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.classList.remove("light", "dark");
-  root.classList.add(theme);
-  root.style.colorScheme = theme;
-  root.setAttribute("data-theme", theme);
-}
 
 function readStoredTheme(): Theme {
   try {
@@ -43,7 +34,9 @@ function readStoredTheme(): Theme {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
 
-  useEffect(() => {
+  // useLayoutEffect runs before paint so React hydration can't leave a
+  // wiped html class looking like the wrong theme on mobile.
+  useLayoutEffect(() => {
     const next = readStoredTheme();
     setThemeState(next);
     applyTheme(next);

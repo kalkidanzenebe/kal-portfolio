@@ -25,19 +25,48 @@ export const metadata: Metadata = {
 
 const themeInitScript = `
 (function() {
+  var light = {
+    '--background': '#f7f7f8',
+    '--foreground': '#111111',
+    '--muted': '#6b7280',
+    '--card': '#ffffff',
+    '--accent': '#ff6600',
+    '--accent-hover': '#e55a00',
+    '--border': '#e5e7eb'
+  };
+  var dark = {
+    '--background': '#0a0a0a',
+    '--foreground': '#f5f5f5',
+    '--muted': '#a3a3a3',
+    '--card': '#141414',
+    '--accent': '#ff6600',
+    '--accent-hover': '#e55a00',
+    '--border': '#262626'
+  };
   try {
     var stored = localStorage.getItem('theme');
     var theme = stored === 'light' || stored === 'dark'
       ? stored
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     var root = document.documentElement;
+    var vars = theme === 'dark' ? dark : light;
+    for (var key in vars) {
+      root.style.setProperty(key, vars[key]);
+      root.style.setProperty('--color-' + key.slice(2), vars[key]);
+    }
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
     root.style.colorScheme = theme;
     root.setAttribute('data-theme', theme);
   } catch (e) {
-    document.documentElement.classList.add('dark');
-    document.documentElement.style.colorScheme = 'dark';
+    var root = document.documentElement;
+    for (var key in dark) {
+      root.style.setProperty(key, dark[key]);
+      root.style.setProperty('--color-' + key.slice(2), dark[key]);
+    }
+    root.classList.add('dark');
+    root.style.colorScheme = 'dark';
+    root.setAttribute('data-theme', 'dark');
   }
 })();
 `;
@@ -48,15 +77,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    // Do NOT put font/theme classes on <html> — React hydration overwrites
+    // className and strips light/dark, which breaks theme after deploy.
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#0a0a0a" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body className="flex min-h-full flex-col">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} flex min-h-full flex-col bg-background text-foreground antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>
