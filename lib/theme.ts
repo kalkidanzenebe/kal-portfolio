@@ -23,12 +23,17 @@ export const themeVars = {
   },
 } as const;
 
+/** Prevents phone OS dark mode from auto-darkening a light site theme. */
+function schemeValue(theme: Theme) {
+  return theme === "dark" ? "only dark" : "only light";
+}
+
 export function getThemeStyle(theme: Theme): CSSProperties {
   const vars = themeVars[theme];
   return {
     backgroundColor: vars["--background"],
     color: vars["--foreground"],
-    colorScheme: theme,
+    colorScheme: schemeValue(theme),
     ["--background" as string]: vars["--background"],
     ["--foreground" as string]: vars["--foreground"],
     ["--muted" as string]: vars["--muted"],
@@ -52,9 +57,8 @@ export function applyTheme(theme: Theme) {
   const vars = themeVars[theme];
   const bg = vars["--background"];
   const fg = vars["--foreground"];
+  const scheme = schemeValue(theme);
 
-  // Write tokens on both html + body. Mobile Safari often keeps painting
-  // from body/html even when React wrappers update.
   for (const el of [root, body]) {
     if (!el) continue;
     for (const [key, value] of Object.entries(vars)) {
@@ -63,7 +67,7 @@ export function applyTheme(theme: Theme) {
     }
     el.style.backgroundColor = bg;
     el.style.color = fg;
-    el.style.colorScheme = theme;
+    el.style.setProperty("color-scheme", scheme);
   }
 
   root.classList.remove("light", "dark");
@@ -71,9 +75,12 @@ export function applyTheme(theme: Theme) {
   root.setAttribute("data-theme", theme);
   body?.setAttribute("data-theme", theme);
 
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute("content", bg);
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute("content", bg);
 
-  const scheme = document.querySelector('meta[name="color-scheme"]');
-  if (scheme) scheme.setAttribute("content", theme);
+  const metaScheme = document.querySelector('meta[name="color-scheme"]');
+  // meta "only dark" is not reliably supported; CSS still uses "only dark"
+  if (metaScheme) {
+    metaScheme.setAttribute("content", theme === "dark" ? "dark" : "only light");
+  }
 }

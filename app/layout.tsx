@@ -50,21 +50,27 @@ const themeInitScript = `
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     var root = document.documentElement;
     var vars = theme === 'dark' ? dark : light;
+    // "only" blocks phone OS auto-dark / auto-light from overriding the site theme
+    var scheme = theme === 'dark' ? 'only dark' : 'only light';
     for (var key in vars) {
       root.style.setProperty(key, vars[key]);
       root.style.setProperty('--color-' + key.slice(2), vars[key]);
     }
     root.style.backgroundColor = vars['--background'];
     root.style.color = vars['--foreground'];
+    root.style.setProperty('color-scheme', scheme);
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    root.style.colorScheme = theme;
     root.setAttribute('data-theme', theme);
+    var metaScheme = document.querySelector('meta[name="color-scheme"]');
+    if (metaScheme) metaScheme.setAttribute('content', theme === 'dark' ? 'dark' : 'only light');
+    var metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute('content', vars['--background']);
     if (document.body) {
       document.body.setAttribute('data-theme', theme);
       document.body.style.backgroundColor = vars['--background'];
       document.body.style.color = vars['--foreground'];
-      document.body.style.colorScheme = theme;
+      document.body.style.setProperty('color-scheme', scheme);
     }
   } catch (e) {
     var root = document.documentElement;
@@ -73,7 +79,7 @@ const themeInitScript = `
       root.style.setProperty('--color-' + key.slice(2), dark[key]);
     }
     root.classList.add('dark');
-    root.style.colorScheme = 'dark';
+    root.style.setProperty('color-scheme', 'only dark');
     root.setAttribute('data-theme', 'dark');
   }
 })();
@@ -89,7 +95,7 @@ export default function RootLayout({
     // className and strips light/dark, which breaks theme after deploy.
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="dark" />
+        <meta name="color-scheme" content="light dark" />
         <meta name="theme-color" content="#0a0a0a" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

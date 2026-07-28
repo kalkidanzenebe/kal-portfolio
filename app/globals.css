@@ -30,7 +30,8 @@ body[data-theme="light"],
   --color-accent: #ff6600 !important;
   --color-accent-hover: #e55a00 !important;
   --color-border: #e5e7eb !important;
-  color-scheme: light;
+  /* "only" stops phone OS dark mode from auto-darkening the page */
+  color-scheme: only light;
 }
 
 html[data-theme="dark"],
@@ -50,7 +51,7 @@ body[data-theme="dark"],
   --color-accent: #ff6600 !important;
   --color-accent-hover: #e55a00 !important;
   --color-border: #262626 !important;
-  color-scheme: dark;
+  color-scheme: only dark;
 }
 
 @theme inline {
