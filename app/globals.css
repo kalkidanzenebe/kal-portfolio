@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
-/* Match data-theme on html OR the React theme wrapper */
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+/* Class-based dark utilities — NOT phone OS prefers-color-scheme */
+@custom-variant dark (&:where(.kz-theme-dark, .kz-theme-dark *));
+
+/*
+  Do NOT set color-scheme here.
+  LightningCSS rewrites color-scheme and can fight phone OS dark mode.
+  color-scheme is applied only via JS (lib/theme.ts).
+*/
 
 :root {
   --background: #f7f7f8;
@@ -13,45 +19,40 @@
   --border: #e5e7eb;
 }
 
-html[data-theme="light"],
-body[data-theme="light"],
+.kz-theme-light,
 [data-theme="light"] {
-  --background: #f7f7f8 !important;
-  --foreground: #111111 !important;
-  --muted: #6b7280 !important;
-  --card: #ffffff !important;
-  --accent: #ff6600 !important;
-  --accent-hover: #e55a00 !important;
-  --border: #e5e7eb !important;
-  --color-background: #f7f7f8 !important;
-  --color-foreground: #111111 !important;
-  --color-muted: #6b7280 !important;
-  --color-card: #ffffff !important;
-  --color-accent: #ff6600 !important;
-  --color-accent-hover: #e55a00 !important;
-  --color-border: #e5e7eb !important;
-  /* "only" stops phone OS dark mode from auto-darkening the page */
-  color-scheme: only light;
+  --background: #f7f7f8;
+  --foreground: #111111;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --accent: #ff6600;
+  --accent-hover: #e55a00;
+  --border: #e5e7eb;
+  --color-background: #f7f7f8;
+  --color-foreground: #111111;
+  --color-muted: #6b7280;
+  --color-card: #ffffff;
+  --color-accent: #ff6600;
+  --color-accent-hover: #e55a00;
+  --color-border: #e5e7eb;
 }
 
-html[data-theme="dark"],
-body[data-theme="dark"],
+.kz-theme-dark,
 [data-theme="dark"] {
-  --background: #0a0a0a !important;
-  --foreground: #f5f5f5 !important;
-  --muted: #a3a3a3 !important;
-  --card: #141414 !important;
-  --accent: #ff6600 !important;
-  --accent-hover: #e55a00 !important;
-  --border: #262626 !important;
-  --color-background: #0a0a0a !important;
-  --color-foreground: #f5f5f5 !important;
-  --color-muted: #a3a3a3 !important;
-  --color-card: #141414 !important;
-  --color-accent: #ff6600 !important;
-  --color-accent-hover: #e55a00 !important;
-  --color-border: #262626 !important;
-  color-scheme: only dark;
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --muted: #a3a3a3;
+  --card: #141414;
+  --accent: #ff6600;
+  --accent-hover: #e55a00;
+  --border: #262626;
+  --color-background: #0a0a0a;
+  --color-foreground: #f5f5f5;
+  --color-muted: #a3a3a3;
+  --color-card: #141414;
+  --color-accent: #ff6600;
+  --color-accent-hover: #e55a00;
+  --color-border: #262626;
 }
 
 @theme inline {
@@ -74,11 +75,11 @@ html {
 
 html,
 body {
+  min-height: 100%;
   background-color: var(--background);
   color: var(--foreground);
 }
 
 body {
-  min-height: 100%;
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { applyTheme, getThemeStyle, type Theme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 type ThemeContextValue = {
   theme: Theme;
@@ -40,6 +41,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setThemeState(next);
     applyTheme(next);
     setReady(true);
+
+    // If phone OS theme changes, re-assert OUR saved theme (don't follow OS).
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onOsTheme = () => {
+      try {
+        const stored = window.localStorage.getItem("theme");
+        if (stored === "light" || stored === "dark") {
+          applyTheme(stored);
+          setThemeState(stored);
+          return;
+        }
+      } catch {
+        // ignore
+      }
+      applyTheme(next);
+    };
+    mq.addEventListener?.("change", onOsTheme);
+    return () => mq.removeEventListener?.("change", onOsTheme);
   }, []);
 
   const setTheme = useCallback((next: Theme) => {
@@ -70,14 +89,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     [theme, setTheme, toggleTheme]
   );
 
-  // React-owned style wrapper: mobile browsers reliably repaint this on toggle,
-  // even when html/body CSS variables get stuck.
   return (
     <ThemeContext.Provider value={value}>
       <div
+        id="kz-theme-root"
         data-theme={theme}
         data-theme-ready={ready ? "true" : "false"}
-        className="min-h-full"
+        className={cn(
+          "min-h-full",
+          theme === "dark" ? "kz-theme-dark" : "kz-theme-light"
+        )}
         style={getThemeStyle(theme)}
       >
         {children}

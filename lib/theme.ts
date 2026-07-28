@@ -23,15 +23,71 @@ export const themeVars = {
   },
 } as const;
 
-/** Prevents phone OS dark mode from auto-darkening a light site theme. */
 function schemeValue(theme: Theme) {
+  // Keep "only" first — some mobile browsers ignore "light only"
   return theme === "dark" ? "only dark" : "only light";
+}
+
+function ensureForceStyleEl(): HTMLStyleElement {
+  let el = document.getElementById("kz-theme-force") as HTMLStyleElement | null;
+  if (!el) {
+    el = document.createElement("style");
+    el.id = "kz-theme-force";
+    document.head.appendChild(el);
+  }
+  return el;
+}
+
+/** Hard-paint theme so phone OS auto-dark cannot keep the page black. */
+export function injectForceStyles(theme: Theme) {
+  const v = themeVars[theme];
+  const bg = v["--background"];
+  const fg = v["--foreground"];
+  const card = v["--card"];
+  const muted = v["--muted"];
+  const border = v["--border"];
+  const accent = v["--accent"];
+  const scheme = schemeValue(theme);
+
+  // background-image solid gradients resist Chrome/Samsung auto-dark rewriting
+  ensureForceStyleEl().textContent = `
+    html, body, #kz-theme-root {
+      color-scheme: ${scheme} !important;
+      forced-color-adjust: none !important;
+      -webkit-tap-highlight-color: transparent;
+      background-color: ${bg} !important;
+      background-image: linear-gradient(${bg}, ${bg}) !important;
+      color: ${fg} !important;
+      --background: ${bg} !important;
+      --foreground: ${fg} !important;
+      --muted: ${muted} !important;
+      --card: ${card} !important;
+      --accent: ${accent} !important;
+      --accent-hover: ${v["--accent-hover"]} !important;
+      --border: ${border} !important;
+      --color-background: ${bg} !important;
+      --color-foreground: ${fg} !important;
+      --color-muted: ${muted} !important;
+      --color-card: ${card} !important;
+      --color-accent: ${accent} !important;
+      --color-accent-hover: ${v["--accent-hover"]} !important;
+      --color-border: ${border} !important;
+    }
+    #kz-theme-root main,
+    #kz-theme-root section,
+    #kz-theme-root header,
+    #kz-theme-root footer {
+      color: ${fg};
+    }
+  `;
 }
 
 export function getThemeStyle(theme: Theme): CSSProperties {
   const vars = themeVars[theme];
+  const bg = vars["--background"];
   return {
-    backgroundColor: vars["--background"],
+    backgroundColor: bg,
+    backgroundImage: `linear-gradient(${bg}, ${bg})`,
     color: vars["--foreground"],
     colorScheme: schemeValue(theme),
     ["--background" as string]: vars["--background"],
@@ -59,27 +115,32 @@ export function applyTheme(theme: Theme) {
   const fg = vars["--foreground"];
   const scheme = schemeValue(theme);
 
+  injectForceStyles(theme);
+
   for (const el of [root, body]) {
     if (!el) continue;
     for (const [key, value] of Object.entries(vars)) {
-      el.style.setProperty(key, value);
-      el.style.setProperty(`--color-${key.slice(2)}`, value);
+      el.style.setProperty(key, value, "important");
+      el.style.setProperty(`--color-${key.slice(2)}`, value, "important");
     }
-    el.style.backgroundColor = bg;
-    el.style.color = fg;
-    el.style.setProperty("color-scheme", scheme);
+    el.style.setProperty("background-color", bg, "important");
+    el.style.setProperty("background-image", `linear-gradient(${bg}, ${bg})`, "important");
+    el.style.setProperty("color", fg, "important");
+    el.style.setProperty("color-scheme", scheme, "important");
+    el.style.setProperty("forced-color-adjust", "none", "important");
   }
 
-  root.classList.remove("light", "dark");
-  root.classList.add(theme);
+  root.classList.remove("light", "dark", "kz-theme-light", "kz-theme-dark");
+  root.classList.add(theme, theme === "dark" ? "kz-theme-dark" : "kz-theme-light");
   root.setAttribute("data-theme", theme);
+  body?.classList.remove("kz-theme-light", "kz-theme-dark");
+  body?.classList.add(theme === "dark" ? "kz-theme-dark" : "kz-theme-light");
   body?.setAttribute("data-theme", theme);
 
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.setAttribute("content", bg);
 
   const metaScheme = document.querySelector('meta[name="color-scheme"]');
-  // meta "only dark" is not reliably supported; CSS still uses "only dark"
   if (metaScheme) {
     metaScheme.setAttribute("content", theme === "dark" ? "dark" : "only light");
   }

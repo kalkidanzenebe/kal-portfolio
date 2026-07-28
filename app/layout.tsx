@@ -43,44 +43,48 @@ const themeInitScript = `
     '--accent-hover': '#e55a00',
     '--border': '#262626'
   };
+  function paint(theme) {
+    var vars = theme === 'dark' ? dark : light;
+    var bg = vars['--background'];
+    var fg = vars['--foreground'];
+    var scheme = theme === 'dark' ? 'only dark' : 'only light';
+    var root = document.documentElement;
+    var css = 'html,body,#kz-theme-root{color-scheme:' + scheme +
+      ' !important;forced-color-adjust:none !important;background-color:' + bg +
+      ' !important;background-image:linear-gradient(' + bg + ',' + bg +
+      ') !important;color:' + fg + ' !important;';
+    for (var key in vars) {
+      css += key + ':' + vars[key] + ' !important;';
+      css += '--color-' + key.slice(2) + ':' + vars[key] + ' !important;';
+    }
+    css += '}';
+    var style = document.getElementById('kz-theme-force');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'kz-theme-force';
+      document.head.appendChild(style);
+    }
+    style.textContent = css;
+    root.classList.remove('light','dark','kz-theme-light','kz-theme-dark');
+    root.classList.add(theme, theme === 'dark' ? 'kz-theme-dark' : 'kz-theme-light');
+    root.setAttribute('data-theme', theme);
+    root.style.setProperty('background-color', bg, 'important');
+    root.style.setProperty('background-image', 'linear-gradient(' + bg + ',' + bg + ')', 'important');
+    root.style.setProperty('color', fg, 'important');
+    root.style.setProperty('color-scheme', scheme, 'important');
+    var metaScheme = document.querySelector('meta[name="color-scheme"]');
+    if (metaScheme) metaScheme.setAttribute('content', theme === 'dark' ? 'dark' : 'only light');
+    var metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) metaTheme.setAttribute('content', bg);
+  }
   try {
     var stored = localStorage.getItem('theme');
     var theme = stored === 'light' || stored === 'dark'
       ? stored
       : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    var root = document.documentElement;
-    var vars = theme === 'dark' ? dark : light;
-    // "only" blocks phone OS auto-dark / auto-light from overriding the site theme
-    var scheme = theme === 'dark' ? 'only dark' : 'only light';
-    for (var key in vars) {
-      root.style.setProperty(key, vars[key]);
-      root.style.setProperty('--color-' + key.slice(2), vars[key]);
-    }
-    root.style.backgroundColor = vars['--background'];
-    root.style.color = vars['--foreground'];
-    root.style.setProperty('color-scheme', scheme);
-    root.classList.remove('light', 'dark');
-    root.classList.add(theme);
-    root.setAttribute('data-theme', theme);
-    var metaScheme = document.querySelector('meta[name="color-scheme"]');
-    if (metaScheme) metaScheme.setAttribute('content', theme === 'dark' ? 'dark' : 'only light');
-    var metaTheme = document.querySelector('meta[name="theme-color"]');
-    if (metaTheme) metaTheme.setAttribute('content', vars['--background']);
-    if (document.body) {
-      document.body.setAttribute('data-theme', theme);
-      document.body.style.backgroundColor = vars['--background'];
-      document.body.style.color = vars['--foreground'];
-      document.body.style.setProperty('color-scheme', scheme);
-    }
+    paint(theme);
   } catch (e) {
-    var root = document.documentElement;
-    for (var key in dark) {
-      root.style.setProperty(key, dark[key]);
-      root.style.setProperty('--color-' + key.slice(2), dark[key]);
-    }
-    root.classList.add('dark');
-    root.style.setProperty('color-scheme', 'only dark');
-    root.setAttribute('data-theme', 'dark');
+    paint('dark');
   }
 })();
 `;
@@ -95,7 +99,7 @@ export default function RootLayout({
     // className and strips light/dark, which breaks theme after deploy.
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content="only light" />
         <meta name="theme-color" content="#0a0a0a" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
