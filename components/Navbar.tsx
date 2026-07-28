@@ -136,9 +136,13 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5">
           <button
             type="button"
-            onClick={toggleTheme}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleTheme();
+            }}
             aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/70 text-foreground transition hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="inline-flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-border bg-card/80 text-foreground transition active:scale-95 hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <motion.span
               key={theme}
@@ -157,7 +161,7 @@ export default function Navbar() {
 
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card/70 text-foreground transition hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:hidden"
+            className="inline-flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-border bg-card/80 text-foreground transition active:scale-95 hover:border-accent/40 hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent md:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="mobile-nav"
@@ -176,7 +180,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="pointer-events-auto mx-auto mt-3 max-w-5xl overflow-hidden rounded-3xl border border-border bg-background/90 p-3 shadow-xl backdrop-blur-xl md:hidden"
+            className="pointer-events-auto mx-auto mt-3 max-w-5xl overflow-hidden rounded-3xl border border-border bg-background/95 p-3 shadow-xl backdrop-blur-xl md:hidden"
           >
             <nav aria-label="Mobile">
               <ul className="flex flex-col gap-1">
@@ -205,6 +209,24 @@ export default function Navbar() {
                 })}
               </ul>
             </nav>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleTheme();
+              }}
+              className="mt-2 flex w-full touch-manipulation items-center justify-between rounded-2xl border border-border bg-card/80 px-4 py-3 text-sm font-medium text-foreground transition active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4 text-accent" aria-hidden="true" />
+              ) : (
+                <Moon className="h-4 w-4 text-accent" aria-hidden="true" />
+              )}
+            </button>
           </motion.div>
         ) : null}
       </AnimatePresence>
